@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>TestWiki App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>📚 TestWiki</h1>
+    <input type="text" id="searchInput" placeholder="Buscar artículos...">
+  </header>
+
+  <main>
+    <section id="form-section">
+      <h2>Nuevo artículo</h2>
+      <input type="text" id="title" placeholder="Título">
+      <textarea id="content" placeholder="Contenido"></textarea>
+      <button onclick="addArticle()">Añadir</button>
+    </section>
+
+    <section id="articles-section">
+      <h2>Artículos</h2>
+      <div id="articles"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>TestWiki © 2026</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
