@@ -21,18 +21,18 @@ export default function Dashboard() {
 
   function loadData() {
 
-    // 📦 INVENTARIO REAL
+    
     const data = localStorage.getItem('materials')
     const parsed = data ? JSON.parse(data) : []
     setMaterials(parsed.length)
 
-    // 📍 UBICACIONES (placeholder)
+    
     setUbicaciones(4)
 
     setUsuarios(0)
     setAlertas(0)
 
-    // 📊 HISTORIAL → GRÁFICA
+    
     const historyData = localStorage.getItem('history')
     const history = historyData ? JSON.parse(historyData) : []
 

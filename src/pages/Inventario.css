@@ -145,6 +145,10 @@ select {
   flex-wrap: nowrap;
 }
 
+.inventory-layout {
+  --cols: 2fr 1fr 1fr 1.2fr 1fr 1fr;
+}
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
   .row {

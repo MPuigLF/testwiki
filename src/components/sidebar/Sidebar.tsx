@@ -36,7 +36,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        IT Inventory System v1
+        IT Inventory System
       </div>
 
     </aside>
