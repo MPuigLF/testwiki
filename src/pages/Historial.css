@@ -1,0 +1,50 @@
+.history-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.history-layout h1 {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+/* SEARCH */
+.search {
+  padding: 10px 14px;
+  border-radius: 10px;
+
+  border: 1px solid #1f2937;
+  background: #0f172a;
+
+  color: white;
+  outline: none;
+}
+
+/* TABLE */
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+
+  padding: 12px;
+
+  background: #0f172a;
+  border: 1px solid #1f2937;
+
+  border-radius: 10px;
+
+  color: #e5e7eb;
+}
+
+.header {
+  font-weight: bold;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+}
