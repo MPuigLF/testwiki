@@ -7,7 +7,7 @@
 /* FORM */
 .form-card {
   background: #111827;
-  border: 1px solid #1f2937;
+  border: 1px solid #728bae;
   border-radius: 12px;
   padding: 20px;
 }
@@ -31,7 +31,7 @@
 /* TABLA */
 .table {
   background: #111827;
-  border: 1px solid #1f2937;
+  border: 1px solid #607695;
   border-radius: 12px;
   overflow-x: auto;
 }
@@ -47,7 +47,7 @@
 
   padding: 12px;
 
-  border-bottom: 1px solid #1f2937;
+  border-bottom: 1px solid #58687e;
 
   align-items: center;
 

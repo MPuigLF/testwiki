@@ -58,6 +58,10 @@ export default function Usuarios() {
 
     setUsers(updated)
     saveUsers(updated)
+
+   
+    window.dispatchEvent(new Event('storage'))
+
     reset()
   }
 
@@ -70,6 +74,9 @@ export default function Usuarios() {
     const updated = users.filter(u => u.id !== id)
     setUsers(updated)
     saveUsers(updated)
+
+    
+    window.dispatchEvent(new Event('storage'))
   }
 
   return (
@@ -101,12 +108,11 @@ export default function Usuarios() {
         />
 
         <select name="rol" value={form.rol} onChange={handleChange}>
-          <option value="usuario">Usuario</option>
-          <option value="tecnico">Técnico</option>
-          <option value="admin">Admin</option>
+          <option value="Usuario">Usuario</option>
+          <option value="Técnico">Técnico</option>
+          <option value="Administrador">Administrador</option>
         </select>
 
-        {/* 🔥 DESPLEGABLE DE MATERIAL */}
         <select
           name="material"
           value={form.material}

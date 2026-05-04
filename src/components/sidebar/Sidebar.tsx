@@ -16,7 +16,7 @@ export default function Sidebar() {
     <aside className="sidebar">
 
       <div className="sidebar-title">
-        🖥 PANEL IT
+        CONTROL PANEL 
       </div>
 
       <nav className="nav">

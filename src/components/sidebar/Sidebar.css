@@ -12,7 +12,7 @@
   background: linear-gradient(
     180deg,
     rgba(15, 23, 42, 0.95),
-    rgba(2, 6, 23, 0.95)
+    rgba(59, 56, 90, 0.95)
   );
 
   border-right: 1px solid rgba(255,255,255,0.08);
@@ -36,7 +36,7 @@
   padding: 12px 14px;
   border-radius: 10px;
 
-  color: #cbd5e1;
+  color: #e6a77a;
   text-decoration: none;
 
   font-size: 14px;
@@ -57,7 +57,7 @@
   background: linear-gradient(
     90deg,
     rgba(249, 115, 22, 0.25),
-    rgba(59, 130, 246, 0.15)
+    rgba(28, 19, 19, 0.15)
   );
 
   color: white;
@@ -69,6 +69,6 @@
 .sidebar-footer {
   margin-top: auto;
   font-size: 11px;
-  color: rgba(255,255,255,0.4);
+  color: rgb(255, 255, 255);
   padding-top: 20px;
 }

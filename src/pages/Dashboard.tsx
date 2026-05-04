@@ -10,6 +10,10 @@ import {
   ResponsiveContainer
 } from 'recharts'
 
+import Alertas from '../components/Alertas/Alertas'
+import Notificaciones from '../components/Notificaciones/Notificaciones'
+import { getUsers } from '../data/users'
+
 export default function Dashboard() {
 
   const [materials, setMaterials] = useState(0)
@@ -17,22 +21,29 @@ export default function Dashboard() {
   const [usuarios, setUsuarios] = useState(0)
   const [alertas, setAlertas] = useState(0)
 
+  const [openAlertas, setOpenAlertas] = useState(false)
+
   const [chartData, setChartData] = useState<any[]>([])
 
   function loadData() {
 
-    
+    // MATERIALS
     const data = localStorage.getItem('materials')
     const parsed = data ? JSON.parse(data) : []
     setMaterials(parsed.length)
 
-    
+    // UBICACIONES
     setUbicaciones(4)
 
-    setUsuarios(0)
-    setAlertas(0)
+    // USUARIOS
+    const users = getUsers()
+    setUsuarios(users.length)
 
-    
+    // ALERTAS (stock < 200)
+    const low = parsed.filter((m: any) => m.cantidad < 200)
+    setAlertas(low.length)
+
+    // HISTORIAL
     const historyData = localStorage.getItem('history')
     const history = historyData ? JSON.parse(historyData) : []
 
@@ -60,7 +71,6 @@ export default function Dashboard() {
 
       <h1>INVENTARIO DEPARTAMENTO IT</h1>
 
-      {/* KPI CARDS */}
       <div className="grid">
 
         <div className="card orange">
@@ -78,14 +88,18 @@ export default function Dashboard() {
           <p>{usuarios}</p>
         </div>
 
-        <div className="card orange">
+        {/* 👇 CLICKABLE */}
+        <div
+          className="card orange"
+          onClick={() => setOpenAlertas(true)}
+          style={{ cursor: 'pointer' }}
+        >
           <h3>ALERTAS</h3>
           <p>{alertas}</p>
         </div>
 
       </div>
 
-      
       <div className="chart-card">
 
         <h3>SEGUIMIENTO DE MOVIMIENTOS</h3>
@@ -109,6 +123,12 @@ export default function Dashboard() {
 
       </div>
 
+      {/* 👇 SIDEBAR ALERTAS */}
+      <Alertas
+        open={openAlertas}
+        onClose={() => setOpenAlertas(false)}
+      />
+<Notificaciones />
     </div>
   )
 }
