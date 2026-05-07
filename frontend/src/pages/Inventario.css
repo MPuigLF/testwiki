@@ -1,0 +1,170 @@
+/* Inventario.css */
+
+.inventory-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* FORM */
+.form-card {
+  background: #111827;
+  border: 1px solid #728bae;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.form-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: white;
+}
+
+/* INPUTS */
+.input,
+select,
+input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+
+  background: #0f172a;
+  border: 1px solid #1f2937;
+
+  color: white;
+
+  border-radius: 6px;
+
+  box-sizing: border-box;
+}
+
+/* TABLA */
+.table {
+  background: #111827;
+  border: 1px solid #607695;
+  border-radius: 12px;
+
+  overflow-x: auto;
+}
+
+/* FILAS */
+.row {
+  display: grid;
+
+  grid-template-columns:
+    1.5fr
+    1fr
+    0.8fr
+    1fr
+    1.2fr
+    1fr;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  border-bottom: 1px solid #58687e;
+
+  align-items: center;
+
+  min-width: 1000px;
+}
+
+/* HEADER */
+.row.header {
+  background: #0f172a;
+
+  font-size: 12px;
+
+  text-transform: uppercase;
+
+  font-weight: bold;
+
+  color: #cbd5e1;
+}
+
+/* TEXTO */
+.row > div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* INPUT RESTAR */
+.row input[type='number'] {
+  width: 70px;
+
+  padding: 6px;
+
+  background: #eef3ff;
+  border: 3px solid #e7872e;
+
+  color: rgb(0, 0, 0);
+
+  border-radius: 6px;
+
+  margin: 0;
+}
+
+/* BOTONES */
+.btn-edit {
+  background: #2563eb;
+  color: white;
+
+  border: none;
+
+  padding: 6px 8px;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+
+  border: none;
+
+  padding: 6px 8px;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+}
+
+.btn-ok {
+  background: #f97316;
+  color: white;
+
+  border: none;
+
+  padding: 6px 10px;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+}
+
+/* ACCIONES */
+.row > div:nth-last-child(2),
+.row > div:last-child {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+
+  .row {
+    grid-template-columns: 1fr;
+    min-width: 100%;
+  }
+
+  .row > div {
+    display: flex;
+    justify-content: space-between;
+  }
+}
