@@ -1,43 +1,50 @@
 import { useEffect, useState } from 'react'
 import './Inventario.css'
 
-import {
-  getLocations,
-  saveLocations,
-  getNextLocationId
-} from '../data/locations'
+const API = "http://localhost:3001/locations"
 
-import type { Location } from '../data/locations'
+type Location = {
+  id: number
+  name: string
+}
 
 export default function Ubicaciones() {
-  const [items, setItems] = useState<Location[]>([])
 
+  const [items, setItems] = useState<Location[]>([])
   const [name, setName] = useState('')
   const [editId, setEditId] = useState<number | null>(null)
 
+  async function load() {
+    const res = await fetch(API)
+    const data = await res.json()
+    setItems(data)
+  }
+
   useEffect(() => {
-    setItems(getLocations())
+    load()
   }, [])
 
-  function save() {
+  async function save() {
+
     if (!name.trim()) return
 
-    let updated = [...items]
-
     if (editId !== null) {
-      updated = updated.map(l =>
-        l.id === editId ? { id: editId, name } : l
-      )
+      await fetch(`${API}/${editId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      })
     } else {
-      updated.push({
-        id: getNextLocationId(),
-        name
+      await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
       })
     }
 
-    setItems(updated)
-    saveLocations(updated)
-    reset()
+    setName('')
+    setEditId(null)
+    load()
   }
 
   function edit(item: Location) {
@@ -45,10 +52,12 @@ export default function Ubicaciones() {
     setEditId(item.id)
   }
 
-  function remove(id: number) {
-    const updated = items.filter(l => l.id !== id)
-    setItems(updated)
-    saveLocations(updated)
+  async function remove(id: number) {
+    await fetch(`${API}/${id}`, {
+      method: "DELETE"
+    })
+
+    load()
   }
 
   function reset() {
@@ -87,7 +96,7 @@ export default function Ubicaciones() {
 
       </div>
 
-      {/* LISTA */}
+      {/* LIST */}
       <div className="table">
 
         <div className="row header">
@@ -97,9 +106,11 @@ export default function Ubicaciones() {
 
         {items.map(item => (
           <div className="row" key={item.id}>
+
             <div>{item.name}</div>
 
             <div>
+
               <button className="btn-edit" onClick={() => edit(item)}>
                 EDITAR
               </button>
@@ -107,7 +118,9 @@ export default function Ubicaciones() {
               <button className="btn-delete" onClick={() => remove(item.id)}>
                 BORRAR
               </button>
+
             </div>
+
           </div>
         ))}
 

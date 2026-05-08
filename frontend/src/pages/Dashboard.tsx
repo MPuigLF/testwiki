@@ -1,5 +1,3 @@
-// Dashboard.tsx
-
 import { useEffect, useState } from 'react'
 import './Dashboard.css'
 
@@ -15,8 +13,9 @@ import {
 
 import Alertas from '../components/Alertas/Alertas'
 import Notificaciones from '../components/Notificaciones/Notificaciones'
-import { getUsers } from '../data/users'
-import { getMaterials } from '../data/materials'
+
+const USERS_API = "http://localhost:3001/users"
+const MATERIALS_API = "http://localhost:3001/materials"
 
 export default function Dashboard() {
 
@@ -28,63 +27,46 @@ export default function Dashboard() {
   const [chartData, setChartData] = useState<any[]>([])
   const [openAlertas, setOpenAlertas] = useState(false)
 
-  function loadData() {
+  async function loadData() {
 
-    const parsed = getMaterials()
+    const usersRes = await fetch(USERS_API)
+    const users = await usersRes.json()
 
-    setMaterials(parsed.length)
+    const matRes = await fetch(MATERIALS_API)
+    const materialsData = await matRes.json()
+
+    setUsuarios(users.length)
+    setMaterials(materialsData.length)
 
     const uniqueLocations = [
-      ...new Set(parsed.map((m: any) => m.ubicacion).filter(Boolean))
+      ...new Set(materialsData.map((m: any) => m.ubicacion).filter(Boolean))
     ]
 
     setUbicaciones(uniqueLocations.length)
 
-    setUsuarios(getUsers().length)
+    setAlertas(materialsData.filter((m: any) => m.cantidad < 200).length)
 
-    setAlertas(parsed.filter((m: any) => m.cantidad < 200).length)
-
+    // si encara no tens history en backend, deixem fallback temporal
     const history = JSON.parse(localStorage.getItem('history') || '[]')
 
     const sorted = [...history].sort(
       (a: any, b: any) =>
-        new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
+        new Date(a.fecha).getTime() -
+        new Date(b.fecha).getTime()
     )
 
-    let stock = 0
-
-    const processed = sorted.map((item: any, index: number) => {
-
-      const entradas = item.cantidad > 0 ? item.cantidad : 0
-      const salidas = item.cantidad < 0 ? Math.abs(item.cantidad) : 0
-
-      stock += entradas - salidas
-
-      return {
-        index: index + 1,
-        stock,
-        entradas,
-        salidas
-      }
-    })
+    const processed = sorted.map((item: any, index: number) => ({
+      index: index + 1,
+      stock: item.cantidad,
+      entradas: item.cantidad > 0 ? item.cantidad : 0,
+      salidas: item.cantidad < 0 ? Math.abs(item.cantidad) : 0
+    }))
 
     setChartData(processed)
   }
 
   useEffect(() => {
-
     loadData()
-
-    const handleStorage = () => {
-      loadData()
-    }
-
-    window.addEventListener('storage', handleStorage)
-
-    return () => {
-      window.removeEventListener('storage', handleStorage)
-    }
-
   }, [])
 
   return (
@@ -109,10 +91,7 @@ export default function Dashboard() {
           <p>{usuarios}</p>
         </div>
 
-        <div
-          className="card orange"
-          onClick={() => setOpenAlertas(true)}
-        >
+        <div className="card orange" onClick={() => setOpenAlertas(true)}>
           <h3>ALERTAS</h3>
           <p>{alertas}</p>
         </div>
@@ -123,7 +102,7 @@ export default function Dashboard() {
 
         <h3>MOVIMIENTOS</h3>
 
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={350}>
 
           <LineChart data={chartData}>
 
@@ -132,32 +111,9 @@ export default function Dashboard() {
             <Tooltip />
             <Legend />
 
-            <Line
-              type="monotone"
-              dataKey="stock"
-              stroke="#111827"
-              strokeWidth={3}
-              dot={false}
-              name="Stock"
-            />
-
-            <Line
-              type="monotone"
-              dataKey="entradas"
-              stroke="#f97316"
-              strokeWidth={2}
-              dot={false}
-              name="Entradas"
-            />
-
-            <Line
-              type="monotone"
-              dataKey="salidas"
-              stroke="#fdba74"
-              strokeWidth={2}
-              dot={false}
-              name="Salidas"
-            />
+            <Line type="monotone" dataKey="stock" stroke="#111827" strokeWidth={3} />
+            <Line type="monotone" dataKey="entradas" stroke="#f97316" />
+            <Line type="monotone" dataKey="salidas" stroke="#fdba74" />
 
           </LineChart>
 
@@ -165,11 +121,7 @@ export default function Dashboard() {
 
       </div>
 
-      <Alertas
-        open={openAlertas}
-        onClose={() => setOpenAlertas(false)}
-      />
-
+      <Alertas open={openAlertas} onClose={() => setOpenAlertas(false)} />
       <Notificaciones />
 
     </div>

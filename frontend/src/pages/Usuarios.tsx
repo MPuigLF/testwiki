@@ -1,31 +1,39 @@
-import { useEffect, useState } from 'react'
-import './Usuarios.css'
+import { useEffect, useState } from "react"
+import "./Usuarios.css"
 
-import { getUsers, saveUsers, getNextUserId } from '../data/users'
-import type { User } from '../data/users'
+const API = "http://localhost:3001/users"
 
-import { getMaterials } from '../data/materials'
-import type { Material } from '../data/materials'
+type User = {
+  id: number
+  nombre: string
+  email: string
+  rol: string
+  material: string
+}
 
 export default function Usuarios() {
 
   const [users, setUsers] = useState<User[]>([])
-  const [materials, setMaterials] = useState<Material[]>([])
+  const [editId, setEditId] = useState<number | null>(null)
 
   const [form, setForm] = useState<User>({
     id: 0,
-    nombre: '',
-    email: '',
-    rol: 'usuario',
-    material: ''
+    nombre: "",
+    email: "",
+    rol: "usuario",
+    material: ""
   })
 
-  const [editId, setEditId] = useState<number | null>(null)
-
+  // 🔵 LOAD
   useEffect(() => {
-    setUsers(getUsers())
-    setMaterials(getMaterials())
+    loadUsers()
   }, [])
+
+  async function loadUsers() {
+    const res = await fetch(API)
+    const data = await res.json()
+    setUsers(data)
+  }
 
   function handleChange(e: any) {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -34,34 +42,32 @@ export default function Usuarios() {
   function reset() {
     setForm({
       id: 0,
-      nombre: '',
-      email: '',
-      rol: 'usuario',
-      material: ''
+      nombre: "",
+      email: "",
+      rol: "usuario",
+      material: ""
     })
     setEditId(null)
   }
 
-  function save() {
-    let updated = [...users]
+  // 🔵 SAVE (CREATE / UPDATE)
+  async function save() {
 
     if (editId !== null) {
-      updated = updated.map(u =>
-        u.id === editId ? { ...form, id: editId } : u
-      )
+      await fetch(`${API}/${editId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      })
     } else {
-      updated.push({
-        ...form,
-        id: getNextUserId()
+      await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
       })
     }
 
-    setUsers(updated)
-    saveUsers(updated)
-
-   
-    window.dispatchEvent(new Event('storage'))
-
+    await loadUsers()
     reset()
   }
 
@@ -70,13 +76,13 @@ export default function Usuarios() {
     setEditId(user.id)
   }
 
-  function remove(id: number) {
-    const updated = users.filter(u => u.id !== id)
-    setUsers(updated)
-    saveUsers(updated)
+  // 🔵 DELETE
+  async function remove(id: number) {
+    await fetch(`${API}/${id}`, {
+      method: "DELETE"
+    })
 
-    
-    window.dispatchEvent(new Event('storage'))
+    await loadUsers()
   }
 
   return (
@@ -88,7 +94,7 @@ export default function Usuarios() {
       <div className="form-card">
 
         <div className="form-title">
-          {editId !== null ? 'EDITAR USUARIO' : 'CREAR USUARIO'}
+          {editId !== null ? "EDITAR USUARIO" : "CREAR USUARIO"}
         </div>
 
         <input
@@ -108,24 +114,18 @@ export default function Usuarios() {
         />
 
         <select name="rol" value={form.rol} onChange={handleChange}>
-          <option value="Usuario">Usuario</option>
-          <option value="Técnico">Técnico</option>
-          <option value="Administrador">Administrador</option>
+          <option value="usuario">Usuario</option>
+          <option value="técnico">Técnico</option>
+          <option value="administrador">Administrador</option>
         </select>
 
-        <select
+        <input
+          className="input"
           name="material"
+          placeholder="Material"
           value={form.material}
           onChange={handleChange}
-        >
-          <option value="">Asignar material</option>
-
-          {materials.map(m => (
-            <option key={m.id} value={m.nombre}>
-              {m.nombre}
-            </option>
-          ))}
-        </select>
+        />
 
         <button className="btn-edit" onClick={save}>
           GUARDAR
@@ -139,7 +139,7 @@ export default function Usuarios() {
 
       </div>
 
-      {/* TABLA */}
+      {/* TABLE */}
       <div className="table">
 
         <div className="row header">

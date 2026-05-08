@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
 import './Historial.css'
-import { getHistory } from '../data/history'
+
+const API = "http://localhost:3001/history"
 
 export default function Historial() {
 
   const [items, setItems] = useState<any[]>([])
   const [search, setSearch] = useState('')
 
-  function loadHistory() {
+  async function loadHistory() {
+    const res = await fetch(API)
+    const data = await res.json()
 
-    const history = getHistory()
-
-    const sorted = [...history].sort(
+    const sorted = [...data].sort(
       (a, b) =>
         new Date(b.fecha).getTime() -
         new Date(a.fecha).getTime()
@@ -21,26 +22,7 @@ export default function Historial() {
   }
 
   useEffect(() => {
-
     loadHistory()
-
-    const update = () => loadHistory()
-
-    // ✔️ evento interno tuyo
-    window.addEventListener('history-updated', update)
-
-    // ✔️ cambios de localStorage (otras pestañas)
-    window.addEventListener('storage', update)
-
-    // ✔️ cuando vuelves a la pestaña
-    window.addEventListener('focus', update)
-
-    return () => {
-      window.removeEventListener('history-updated', update)
-      window.removeEventListener('storage', update)
-      window.removeEventListener('focus', update)
-    }
-
   }, [])
 
   const filtered = items.filter(item =>
@@ -69,7 +51,6 @@ export default function Historial() {
         </div>
 
         {filtered.map((item, i) => (
-
           <div className="row" key={i}>
 
             <div>{item.material}</div>
@@ -83,12 +64,9 @@ export default function Historial() {
               {item.cantidad > 0 ? '+' : ''}{item.cantidad}
             </div>
 
-            <div>
-              {new Date(item.fecha).toLocaleString()}
-            </div>
+            <div>{new Date(item.fecha).toLocaleString()}</div>
 
           </div>
-
         ))}
 
       </div>

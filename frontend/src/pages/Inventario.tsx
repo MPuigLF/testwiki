@@ -1,26 +1,15 @@
 import { useEffect, useState } from 'react'
 import './Inventario.css'
 
-import {
-  getMaterials,
-  saveMaterials,
-  getNextId
-} from '../data/materials'
-
-import type { Material } from '../data/materials'
-
-import { getLocations } from '../data/locations'
-import type { Location } from '../data/locations'
-
-import { addHistory } from '../data/history'
+const API = "http://localhost:3001/materials"
+const HISTORY_API = "http://localhost:3001/history"
 
 export default function Inventario() {
 
-  const [items, setItems] = useState<Material[]>([])
-  const [locations, setLocations] = useState<Location[]>([])
+  const [items, setItems] = useState<any[]>([])
+  const [locations, setLocations] = useState<any[]>([])
 
-  const [form, setForm] = useState<Material>({
-    id: 0,
+  const [form, setForm] = useState({
     nombre: '',
     tipo: '',
     ubicacion: '',
@@ -31,53 +20,41 @@ export default function Inventario() {
 
   const [restar, setRestar] = useState<{ [key: number]: number }>({})
 
+  async function load() {
+    const res = await fetch(API)
+    const data = await res.json()
+    setItems(data)
+  }
+
   useEffect(() => {
-    setItems(getMaterials())
-    setLocations(getLocations())
+    load()
   }, [])
 
-  function emitUpdate() {
-    window.dispatchEvent(new Event('history-updated'))
+  function handleChange(e: any) {
+    setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) {
-    const { name, value } = e.target
-
-    setForm({
-      ...form,
-      [name]:
-        name === 'cantidad'
-          ? Number(value) || 1
-          : value
+  async function addHistory(entry: any) {
+    await fetch(HISTORY_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
     })
   }
 
-  function reset() {
-    setForm({
-      id: 0,
-      nombre: '',
-      tipo: '',
-      ubicacion: '',
-      cantidad: 1
-    })
-    setEditId(null)
-  }
+  async function save() {
 
-  function save() {
-
-    let updated = [...items]
     const now = new Date().toISOString()
 
     if (editId !== null) {
 
-      updated = updated.map(item =>
-        item.id === editId ? { ...form, id: editId } : item
-      )
+      await fetch(`${API}/${editId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      })
 
-      addHistory({
-        action: 'EDITADO',
+      await addHistory({
         material: form.nombre,
         tipo: form.tipo,
         ubicacion: form.ubicacion,
@@ -87,47 +64,32 @@ export default function Inventario() {
 
     } else {
 
-      const newItem = {
-        ...form,
-        id: getNextId()
-      }
+      await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      })
 
-      updated.push(newItem)
-
-      addHistory({
-        action: 'CREADO',
-        material: newItem.nombre,
-        tipo: newItem.tipo,
-        ubicacion: newItem.ubicacion,
-        cantidad: newItem.cantidad,
+      await addHistory({
+        material: form.nombre,
+        tipo: form.tipo,
+        ubicacion: form.ubicacion,
+        cantidad: form.cantidad,
         fecha: now
       })
     }
 
-    setItems(updated)
-    saveMaterials(updated)
-
-    emitUpdate()
-    reset()
+    load()
   }
 
-  function edit(item: Material) {
-    setForm(item)
-    setEditId(item.id)
-  }
-
-  function remove(id: number) {
+  async function remove(id: number) {
 
     const item = items.find(i => i.id === id)
     if (!item) return
 
-    const updated = items.filter(i => i.id !== id)
+    await fetch(`${API}/${id}`, { method: "DELETE" })
 
-    setItems(updated)
-    saveMaterials(updated)
-
-    addHistory({
-      action: 'BORRADO',
+    await addHistory({
       material: item.nombre,
       tipo: item.tipo,
       ubicacion: item.ubicacion,
@@ -135,10 +97,10 @@ export default function Inventario() {
       fecha: new Date().toISOString()
     })
 
-    emitUpdate()
+    load()
   }
 
-  function restarCantidad(id: number) {
+  async function restarCantidad(id: number) {
 
     const cantidad = restar[id] || 0
     if (cantidad <= 0) return
@@ -146,17 +108,16 @@ export default function Inventario() {
     const item = items.find(i => i.id === id)
     if (!item) return
 
-    const updated = items.map(i =>
-      i.id === id
-        ? { ...i, cantidad: i.cantidad - cantidad }
-        : i
-    )
+    await fetch(`${API}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...item,
+        cantidad: item.cantidad - cantidad
+      })
+    })
 
-    setItems(updated)
-    saveMaterials(updated)
-
-    addHistory({
-      action: 'EDITADO',
+    await addHistory({
       material: item.nombre,
       tipo: item.tipo,
       ubicacion: item.ubicacion,
@@ -165,8 +126,7 @@ export default function Inventario() {
     })
 
     setRestar({ ...restar, [id]: 0 })
-
-    emitUpdate()
+    load()
   }
 
   return (
@@ -176,101 +136,34 @@ export default function Inventario() {
 
       <div className="form-card">
 
-        <input className="input" name="nombre" placeholder="Nombre" value={form.nombre} onChange={handleChange} />
-        <input className="input" name="tipo" placeholder="Tipo" value={form.tipo} onChange={handleChange} />
-
-        <input
-          className="input"
-          type="number"
-          name="cantidad"
-          value={form.cantidad}
-          onChange={handleChange}
-          min={1}
-        />
-
-        <select
-          className="input"
-          name="ubicacion"
-          value={form.ubicacion}
-          onChange={handleChange}
-        >
-          <option value="">Ubicación</option>
-          {locations.map(l => (
-            <option key={l.id} value={l.name}>
-              {l.name}
-            </option>
-          ))}
-        </select>
+        <input name="nombre" placeholder="Nombre" onChange={handleChange} />
+        <input name="tipo" placeholder="Tipo" onChange={handleChange} />
+        <input name="cantidad" type="number" onChange={handleChange} />
+        <input name="ubicacion" placeholder="Ubicación" onChange={handleChange} />
 
         <button className="btn-edit" onClick={save}>
-          {editId ? 'ACTUALIZAR' : 'GUARDAR'}
+          {editId ? "ACTUALIZAR" : "GUARDAR"}
         </button>
-
-        {editId && (
-          <button className="btn-delete" onClick={reset}>
-            CANCELAR
-          </button>
-        )}
 
       </div>
 
-      <div
-        className="table"
-        style={{ ['--cols' as any]: '2fr 1fr 1fr 1fr 1fr 1fr' }}
-      >
+      <div className="table">
 
-        <div className="row header">
-          <div>Nombre</div>
-          <div>Tipo</div>
-          <div>Cantidad</div>
-          <div>Ubicación</div>
-          <div>Restar</div>
-          <div>Acciones</div>
-        </div>
+        {items.map(i => (
+          <div className="row" key={i.id}>
 
-        {items.map(item => (
-
-          <div className="row" key={item.id}>
-
-            <div>{item.nombre}</div>
-            <div>{item.tipo}</div>
-            <div>{item.cantidad}</div>
-            <div>{item.ubicacion}</div>
+            <div>{i.nombre}</div>
+            <div>{i.tipo}</div>
+            <div>{i.cantidad}</div>
+            <div>{i.ubicacion}</div>
 
             <div>
-
-              <input
-                className="input"
-                type="number"
-                value={restar[item.id] || ''}
-                onChange={(e) =>
-                  setRestar({
-                    ...restar,
-                    [item.id]: Number(e.target.value)
-                  })
-                }
-              />
-
-              <button className="btn-edit" onClick={() => restarCantidad(item.id)}>
-                OK
-              </button>
-
-            </div>
-
-            <div>
-
-              <button className="btn-edit" onClick={() => edit(item)}>
-                EDITAR
-              </button>
-
-              <button className="btn-delete" onClick={() => remove(item.id)}>
+              <button className="btn-delete" onClick={() => remove(i.id)}>
                 BORRAR
               </button>
-
             </div>
 
           </div>
-
         ))}
 
       </div>
