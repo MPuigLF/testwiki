@@ -22,10 +22,7 @@ app.get("/", (req, res) => {
 
 app.get("/users", (req, res) => {
   db.query("SELECT * FROM users", (err, results) => {
-    if (err) {
-      console.error(err)
-      return res.status(500).json({ error: "Error users" })
-    }
+    if (err) return res.status(500).json(err)
     res.json(results)
   })
 })
@@ -37,10 +34,7 @@ app.post("/users", (req, res) => {
     "INSERT INTO users (nombre, email, rol, material) VALUES (?, ?, ?, ?)",
     [nombre, email, rol, material],
     (err, result) => {
-      if (err) {
-        console.error(err)
-        return res.status(500).json({ error: "Error create user" })
-      }
+      if (err) return res.status(500).json(err)
       res.json({ id: result.insertId, ...req.body })
     }
   )
@@ -53,10 +47,7 @@ app.put("/users/:id", (req, res) => {
     "UPDATE users SET nombre=?, email=?, rol=?, material=? WHERE id=?",
     [nombre, email, rol, material, req.params.id],
     (err) => {
-      if (err) {
-        console.error(err)
-        return res.status(500).json({ error: "Error update user" })
-      }
+      if (err) return res.status(500).json(err)
       res.json({ message: "updated" })
     }
   )
@@ -64,10 +55,7 @@ app.put("/users/:id", (req, res) => {
 
 app.delete("/users/:id", (req, res) => {
   db.query("DELETE FROM users WHERE id=?", [req.params.id], (err) => {
-    if (err) {
-      console.error(err)
-      return res.status(500).json({ error: "Error delete user" })
-    }
+    if (err) return res.status(500).json(err)
     res.json({ message: "deleted" })
   })
 })
@@ -78,10 +66,7 @@ app.delete("/users/:id", (req, res) => {
 
 app.get("/materials", (req, res) => {
   db.query("SELECT * FROM materials", (err, results) => {
-    if (err) {
-      console.error(err)
-      return res.status(500).json(err)
-    }
+    if (err) return res.status(500).json(err)
     res.json(results)
   })
 })
@@ -93,10 +78,7 @@ app.post("/materials", (req, res) => {
     "INSERT INTO materials (nombre, tipo, ubicacion, cantidad) VALUES (?, ?, ?, ?)",
     [nombre, tipo, ubicacion, cantidad],
     (err, result) => {
-      if (err) {
-        console.error(err)
-        return res.status(500).json(err)
-      }
+      if (err) return res.status(500).json(err)
       res.json({ id: result.insertId, ...req.body })
     }
   )
@@ -109,10 +91,7 @@ app.put("/materials/:id", (req, res) => {
     "UPDATE materials SET nombre=?, tipo=?, ubicacion=?, cantidad=? WHERE id=?",
     [nombre, tipo, ubicacion, cantidad, req.params.id],
     (err) => {
-      if (err) {
-        console.error(err)
-        return res.status(500).json(err)
-      }
+      if (err) return res.status(500).json(err)
       res.json({ message: "updated" })
     }
   )
@@ -120,10 +99,7 @@ app.put("/materials/:id", (req, res) => {
 
 app.delete("/materials/:id", (req, res) => {
   db.query("DELETE FROM materials WHERE id=?", [req.params.id], (err) => {
-    if (err) {
-      console.error(err)
-      return res.status(500).json(err)
-    }
+    if (err) return res.status(500).json(err)
     res.json({ message: "deleted" })
   })
 })
@@ -134,10 +110,7 @@ app.delete("/materials/:id", (req, res) => {
 
 app.get("/locations", (req, res) => {
   db.query("SELECT * FROM locations", (err, results) => {
-    if (err) {
-      console.error(err)
-      return res.status(500).json(err)
-    }
+    if (err) return res.status(500).json(err)
     res.json(results)
   })
 })
@@ -147,10 +120,7 @@ app.post("/locations", (req, res) => {
     "INSERT INTO locations (name) VALUES (?)",
     [req.body.name],
     (err, result) => {
-      if (err) {
-        console.error(err)
-        return res.status(500).json(err)
-      }
+      if (err) return res.status(500).json(err)
       res.json({ id: result.insertId, name: req.body.name })
     }
   )
@@ -161,10 +131,7 @@ app.put("/locations/:id", (req, res) => {
     "UPDATE locations SET name=? WHERE id=?",
     [req.body.name, req.params.id],
     (err) => {
-      if (err) {
-        console.error(err)
-        return res.status(500).json(err)
-      }
+      if (err) return res.status(500).json(err)
       res.json({ message: "updated" })
     }
   )
@@ -172,48 +139,37 @@ app.put("/locations/:id", (req, res) => {
 
 app.delete("/locations/:id", (req, res) => {
   db.query("DELETE FROM locations WHERE id=?", [req.params.id], (err) => {
-    if (err) {
-      console.error(err)
-      return res.status(500).json(err)
-    }
+    if (err) return res.status(500).json(err)
     res.json({ message: "deleted" })
   })
 })
 
 /* ========================
-   HISTORY
+   HISTORY (CLEAN FINAL)
 ======================== */
 
 app.get("/history", (req, res) => {
-  db.query("SELECT * FROM history ORDER BY id DESC", (err, results) => {
-    if (err) {
-      console.error(err)
-      return res.status(500).json({ error: "Error history" })
+  db.query(
+    "SELECT * FROM history ORDER BY id DESC",
+    (err, results) => {
+      if (err) return res.status(500).json(err)
+      res.json(results)
     }
-    res.json(results)
-  })
+  )
 })
 
 app.post("/history", (req, res) => {
-  const { material, tipo, ubicacion, cantidad, fecha } = req.body
+
+  const { material, tipo, ubicacion, cantidad } = req.body
 
   db.query(
-    "INSERT INTO history (material, tipo, ubicacion, cantidad, fecha) VALUES (?, ?, ?, ?, ?)",
-    [material, tipo, ubicacion, cantidad, fecha],
+    `INSERT INTO history 
+    (material, tipo, ubicacion, cantidad, fecha)
+    VALUES (?, ?, ?, ?, NOW())`,
+    [material, tipo, ubicacion, cantidad],
     (err, result) => {
-      if (err) {
-        console.error(err)
-        return res.status(500).json({ error: "Error insert history" })
-      }
-
-      res.json({
-        id: result.insertId,
-        material,
-        tipo,
-        ubicacion,
-        cantidad,
-        fecha
-      })
+      if (err) return res.status(500).json(err)
+      res.json({ id: result.insertId })
     }
   )
 })
