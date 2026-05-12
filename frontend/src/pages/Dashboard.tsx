@@ -16,6 +16,7 @@ import Notificaciones from '../components/Notificaciones/Notificaciones'
 
 const USERS_API = "http://localhost:3001/users"
 const MATERIALS_API = "http://localhost:3001/materials"
+const HISTORY_API = "http://localhost:3001/history"
 
 export default function Dashboard() {
 
@@ -29,11 +30,17 @@ export default function Dashboard() {
 
   async function loadData() {
 
+    // USERS
     const usersRes = await fetch(USERS_API)
     const users = await usersRes.json()
 
+    // MATERIALS
     const matRes = await fetch(MATERIALS_API)
     const materialsData = await matRes.json()
+
+    
+    const histRes = await fetch(HISTORY_API)
+    const history = await histRes.json()
 
     setUsuarios(users.length)
     setMaterials(materialsData.length)
@@ -41,20 +48,17 @@ export default function Dashboard() {
     const uniqueLocations = [
       ...new Set(materialsData.map((m: any) => m.ubicacion).filter(Boolean))
     ]
-
     setUbicaciones(uniqueLocations.length)
 
     setAlertas(materialsData.filter((m: any) => m.cantidad < 200).length)
 
-    // si encara no tens history en backend, deixem fallback temporal
-    const history = JSON.parse(localStorage.getItem('history') || '[]')
-
+    // 🔥 ORDEN REAL DE MOVIMIENTOS
     const sorted = [...history].sort(
       (a: any, b: any) =>
-        new Date(a.fecha).getTime() -
-        new Date(b.fecha).getTime()
+        new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
     )
 
+    
     const processed = sorted.map((item: any, index: number) => ({
       index: index + 1,
       stock: item.cantidad,
@@ -86,7 +90,7 @@ export default function Dashboard() {
           <p>{ubicaciones}</p>
         </div>
 
-        <div className="card white">
+        <div className="card orange">
           <h3>USUARIOS</h3>
           <p>{usuarios}</p>
         </div>
@@ -98,6 +102,7 @@ export default function Dashboard() {
 
       </div>
 
+      {/* 📊 GRÁFICA */}
       <div className="chart-card">
 
         <h3>MOVIMIENTOS</h3>
@@ -111,7 +116,7 @@ export default function Dashboard() {
             <Tooltip />
             <Legend />
 
-            <Line type="monotone" dataKey="stock" stroke="#111827" strokeWidth={3} />
+            <Line type="monotone" dataKey="stock" stroke="#8494b7"  />
             <Line type="monotone" dataKey="entradas" stroke="#f97316" />
             <Line type="monotone" dataKey="salidas" stroke="#fdba74" />
 

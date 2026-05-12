@@ -3,21 +3,18 @@ import './Inventario.css'
 
 const API = "http://localhost:3001/locations"
 
-type Location = {
-  id: number
-  name: string
-}
-
 export default function Ubicaciones() {
 
-  const [items, setItems] = useState<Location[]>([])
+  const [items, setItems] = useState<any[]>([])
   const [name, setName] = useState('')
   const [editId, setEditId] = useState<number | null>(null)
 
+  const [showModal, setShowModal] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState<any>(null)
+
   async function load() {
     const res = await fetch(API)
-    const data = await res.json()
-    setItems(data)
+    setItems(await res.json())
   }
 
   useEffect(() => {
@@ -47,22 +44,29 @@ export default function Ubicaciones() {
     load()
   }
 
-  function edit(item: Location) {
+  function edit(item: any) {
     setName(item.name)
     setEditId(item.id)
   }
 
   async function remove(id: number) {
-    await fetch(`${API}/${id}`, {
-      method: "DELETE"
-    })
-
+    await fetch(`${API}/${id}`, { method: "DELETE" })
     load()
   }
 
-  function reset() {
+  function cancelEdit() {
     setName('')
     setEditId(null)
+  }
+
+  function openPuntuar(item: any) {
+    setSelectedLocation(item)
+    setShowModal(true)
+  }
+
+  function closeModal() {
+    setShowModal(false)
+    setSelectedLocation(null)
   }
 
   return (
@@ -73,30 +77,25 @@ export default function Ubicaciones() {
       {/* FORM */}
       <div className="form-card">
 
-        <div className="form-title">
-          {editId !== null ? 'EDITAR UBICACIÓN' : 'CREAR UBICACIÓN'}
-        </div>
-
         <input
-          className="input"
-          placeholder="Nombre de la ubicación"
+          placeholder="Nombre ubicación"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <button className="btn-edit" onClick={save}>
-          GUARDAR
+          {editId ? "ACTUALIZAR" : "GUARDAR"}
         </button>
 
         {editId !== null && (
-          <button className="btn-delete" onClick={reset}>
+          <button className="btn-delete" onClick={cancelEdit}>
             CANCELAR
           </button>
         )}
 
       </div>
 
-      {/* LIST */}
+      {/* TABLE */}
       <div className="table">
 
         <div className="row header">
@@ -104,19 +103,35 @@ export default function Ubicaciones() {
           <div>ACCIONES</div>
         </div>
 
-        {items.map(item => (
-          <div className="row" key={item.id}>
+        {items.map(i => (
+          <div className="row" key={i.id}>
 
-            <div>{item.name}</div>
+            <div>{i.name}</div>
 
-            <div>
+            <div style={{ display: "flex", gap: "6px" }}>
 
-              <button className="btn-edit" onClick={() => edit(item)}>
+              <button className="btn-edit" onClick={() => edit(i)}>
                 EDITAR
               </button>
 
-              <button className="btn-delete" onClick={() => remove(item.id)}>
+              <button className="btn-delete" onClick={() => remove(i.id)}>
                 BORRAR
+              </button>
+
+              
+              <button
+                onClick={() => openPuntuar(i)}
+                style={{
+                  background: "#f48439",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 14px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "normal" 
+                }}
+              >
+                PUNTAR
               </button>
 
             </div>
@@ -125,6 +140,85 @@ export default function Ubicaciones() {
         ))}
 
       </div>
+
+     
+      {showModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999
+          }}
+        >
+
+          <div
+            style={{
+              width: "500px",
+              height: "380px",
+              background: "#fff",
+              borderRadius: "16px",
+              padding: "20px 25px", 
+              position: "relative",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
+            }}
+          >
+
+            
+            <h2 style={{ margin: "0 0 8px 0" }}>
+              PUNTUAR UBICACIÓN
+            </h2>
+
+            <p style={{ margin: "0 0 12px 0", color: "#555" }}>
+              {selectedLocation?.name}
+            </p>
+
+            
+            <div
+              style={{
+                width: "100%",
+                height: "260px",
+                border: "2px dashed #bbb",
+                borderRadius: "10px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#999",
+                fontSize: "14px"
+              }}
+            >
+             <img 
+            src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d"
+            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
+                      />
+            </div>
+
+            {/* BOTÓN CERRAR */}
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "12px" }}>
+
+              <button
+                onClick={closeModal}
+                style={{
+                  background: "#333",
+                  color: "#fff",
+                  border: "none",
+                  padding: "9px 18px",
+                  borderRadius: "20px",
+                  cursor: "pointer"
+                }}
+              >
+                CERRAR
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
     </div>
   )

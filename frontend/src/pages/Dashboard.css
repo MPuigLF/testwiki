@@ -3,27 +3,28 @@
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  padding: 10px 4px;
+  gap: 26px;
+  padding: 18px;
+  background: #0b1220; /* 👈 fondo general más limpio */
 }
 
-/* TITULO PRINCIPAL */
+/* TITULO */
 .dashboard h1 {
   font-family: 'Inter', sans-serif;
-
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
-  letter-spacing: 0.3px;
 
-  color: #e2aa79;
+  color: #ffffff;
   margin: 0;
+
+  letter-spacing: 0.4px;
 }
 
 /* GRID */
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
 /* CARD BASE */
@@ -31,59 +32,55 @@
   position: relative;
   overflow: hidden;
 
-  background: linear-gradient(
-    180deg,
-    #391f31 0%,
-    #1b2337 100%
-  );
+  background: linear-gradient(145deg, #111a2e, #0e1628);
 
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
+  border-radius: 14px;
 
-  padding: 18px 18px 16px 18px;
+  padding: 18px;
 
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 
-  box-shadow:
-    0 7px 5px rgba(225, 192, 170, 0.25);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
-
-/* HOVER */
+/* HOVER MÁS SUAVE */
 .card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255, 255, 255, 0.12);
-
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.35);
+  transform: translateY(-7px);
+  box-shadow: 0 6px 14px rgb(218, 112, 19);
 }
 
 /* TITULO CARD */
 .card h3 {
   font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
 
-  font-size: 18px;
-  letter-spacing: 0.8px;
   text-transform: uppercase;
+  letter-spacing: 1px;
 
   margin: 0;
-
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.65);
 }
 
-/* NUMERO (AQUÍ ESTÁ LA MAGIA) */
+/* NUMERO */
 .card p {
   font-family: 'Outfit', sans-serif;
 
-  font-size: 44px;
+  font-size: 38px;
   font-weight: 700;
 
   margin: 10px 0 0 0;
 
-  color: #f8fafc;
-
-  letter-spacing: 0.5px;
+  color: #ffffff;
 }
+
+/* CARD COLORES SUAVES */
+.card.orange {
+  border-left: 3px solid #f4b07a;
+}
+
+
 
 /* RESPONSIVE */
 @media (max-width: 1200px) {
@@ -104,21 +101,22 @@
 
 /* GRAFICA */
 .chart-card {
-  margin-top: 20px;
+  margin-top: 10px;
 
-  background: #101728;
-  border: 0.75px solid #e8c9b4;
+  background: #2e333f;
 
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 14px;
 
-  padding: 20px;
+  padding: 18px;
 }
 
 .chart-card h3 {
   font-family: 'Inter', sans-serif;
 
-  color: #ffffff;
+  color: rgba(255, 255, 255, 0.85);
   margin-bottom: 10px;
-  font-size: 18px;
+
+  font-size: 14px;
   letter-spacing: 1px;
 }

@@ -8,25 +8,17 @@ export default function Historial() {
   const [items, setItems] = useState<any[]>([])
   const [search, setSearch] = useState('')
 
-  async function loadHistory() {
+  async function load() {
     const res = await fetch(API)
-    const data = await res.json()
-
-    const sorted = [...data].sort(
-      (a, b) =>
-        new Date(b.fecha).getTime() -
-        new Date(a.fecha).getTime()
-    )
-
-    setItems(sorted)
+    setItems(await res.json())
   }
 
   useEffect(() => {
-    loadHistory()
+    load()
   }, [])
 
-  const filtered = items.filter(item =>
-    item.material?.toLowerCase().includes(search.toLowerCase())
+  const filtered = items.filter(i =>
+    i.material?.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -35,7 +27,7 @@ export default function Historial() {
       <h1>HISTORIAL</h1>
 
       <input
-        placeholder="Buscar..."
+        placeholder="Buscar material..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
@@ -50,27 +42,28 @@ export default function Historial() {
           <div>FECHA</div>
         </div>
 
-        {filtered.map((item, i) => (
-          <div className="row" key={i}>
+        {filtered.map((i, idx) => (
+          <div className="row" key={idx}>
 
-            <div>{item.material}</div>
-            <div>{item.tipo}</div>
-            <div>{item.ubicacion}</div>
+            <div>{i.material}</div>
+            <div>{i.tipo}</div>
+            <div>{i.ubicacion}</div>
 
             <div style={{
-              color: item.cantidad < 0 ? 'red' : 'green',
-              fontWeight: 'bold'
+              color: i.cantidad < 0 ? "red" : "green",
+              fontWeight: "bold"
             }}>
-              {item.cantidad > 0 ? '+' : ''}{item.cantidad}
+              {i.cantidad > 0 ? "+" : ""}{i.cantidad}
             </div>
 
-            <div>{new Date(item.fecha).toLocaleString()}</div>
+            <div>
+              {new Date(i.fecha).toLocaleString()}
+            </div>
 
           </div>
         ))}
 
       </div>
-
     </div>
   )
 }

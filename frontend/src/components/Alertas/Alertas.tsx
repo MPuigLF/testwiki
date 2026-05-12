@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import './Alertas.css'
 
+const API = "http://localhost:3001/materials"
+
 type Material = {
   id: number
   nombre: string
@@ -20,13 +22,22 @@ export default function Alertas({ open, onClose }: Props) {
     if (open) loadAlerts()
   }, [open])
 
-  function loadAlerts() {
-    const data = localStorage.getItem('materials')
-    const materials = data ? JSON.parse(data) : []
+  async function loadAlerts() {
+    try {
+      const res = await fetch(API)
+      const materials = await res.json()
 
-    const filtered = materials.filter((m: Material) => m.cantidad < 200)
+      // 🔥 alerta real desde backend
+      const filtered = materials.filter(
+        (m: Material) => Number(m.cantidad) < 200
+      )
 
-    setLowStock(filtered)
+      setLowStock(filtered)
+
+    } catch (err) {
+      console.error("Error cargando alertas:", err)
+      setLowStock([])
+    }
   }
 
   return (

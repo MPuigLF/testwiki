@@ -2,55 +2,39 @@ import { useEffect, useState } from "react"
 import "./Usuarios.css"
 
 const API = "http://localhost:3001/users"
-
-type User = {
-  id: number
-  nombre: string
-  email: string
-  rol: string
-  material: string
-}
+const MATERIALS_API = "http://localhost:3001/materials"
 
 export default function Usuarios() {
 
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<any[]>([])
+  const [materials, setMaterials] = useState<any[]>([])
   const [editId, setEditId] = useState<number | null>(null)
 
-  const [form, setForm] = useState<User>({
-    id: 0,
+  const [form, setForm] = useState({
     nombre: "",
     email: "",
     rol: "usuario",
     material: ""
   })
 
-  // 🔵 LOAD
   useEffect(() => {
-    loadUsers()
+    load()
+    fetch(MATERIALS_API).then(r => r.json()).then(setMaterials)
   }, [])
 
-  async function loadUsers() {
-    const res = await fetch(API)
-    const data = await res.json()
-    setUsers(data)
+  async function load() {
+    setUsers(await (await fetch(API)).json())
   }
 
   function handleChange(e: any) {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  function reset() {
-    setForm({
-      id: 0,
-      nombre: "",
-      email: "",
-      rol: "usuario",
-      material: ""
-    })
-    setEditId(null)
+  function edit(user: any) {
+    setForm(user)
+    setEditId(user.id)
   }
 
-  // 🔵 SAVE (CREATE / UPDATE)
   async function save() {
 
     if (editId !== null) {
@@ -67,51 +51,25 @@ export default function Usuarios() {
       })
     }
 
-    await loadUsers()
-    reset()
+    setForm({ nombre: "", email: "", rol: "usuario", material: "" })
+    setEditId(null)
+    load()
   }
 
-  function edit(user: User) {
-    setForm(user)
-    setEditId(user.id)
-  }
-
-  // 🔵 DELETE
   async function remove(id: number) {
-    await fetch(`${API}/${id}`, {
-      method: "DELETE"
-    })
-
-    await loadUsers()
+    await fetch(`${API}/${id}`, { method: "DELETE" })
+    load()
   }
 
   return (
     <div className="users-layout">
 
-      <h1>GESTIÓN DE USUARIOS</h1>
+      <h1>USUARIOS</h1>
 
-      {/* FORM */}
       <div className="form-card">
 
-        <div className="form-title">
-          {editId !== null ? "EDITAR USUARIO" : "CREAR USUARIO"}
-        </div>
-
-        <input
-          className="input"
-          name="nombre"
-          placeholder="Nombre"
-          value={form.nombre}
-          onChange={handleChange}
-        />
-
-        <input
-          className="input"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-        />
+        <input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre" />
+        <input name="email" value={form.email} onChange={handleChange} placeholder="Email" />
 
         <select name="rol" value={form.rol} onChange={handleChange}>
           <option value="usuario">Usuario</option>
@@ -119,27 +77,19 @@ export default function Usuarios() {
           <option value="administrador">Administrador</option>
         </select>
 
-        <input
-          className="input"
-          name="material"
-          placeholder="Material"
-          value={form.material}
-          onChange={handleChange}
-        />
+        <select name="material" value={form.material} onChange={handleChange}>
+          <option value="">Material</option>
+          {materials.map(m => (
+            <option key={m.id} value={m.nombre}>{m.nombre}</option>
+          ))}
+        </select>
 
         <button className="btn-edit" onClick={save}>
-          GUARDAR
+          {editId ? "ACTUALIZAR" : "GUARDAR"}
         </button>
-
-        {editId !== null && (
-          <button className="btn-delete" onClick={reset}>
-            CANCELAR
-          </button>
-        )}
 
       </div>
 
-      {/* TABLE */}
       <div className="table">
 
         <div className="row header">
@@ -150,20 +100,20 @@ export default function Usuarios() {
           <div>ACCIONES</div>
         </div>
 
-        {users.map(user => (
-          <div className="row" key={user.id}>
+        {users.map(u => (
+          <div className="row" key={u.id}>
 
-            <div>{user.nombre}</div>
-            <div>{user.email}</div>
-            <div>{user.rol}</div>
-            <div>{user.material}</div>
+            <div>{u.nombre}</div>
+            <div>{u.email}</div>
+            <div>{u.rol}</div>
+            <div>{u.material}</div>
 
             <div>
-              <button className="btn-edit" onClick={() => edit(user)}>
+              <button className="btn-edit" onClick={() => edit(u)}>
                 EDITAR
               </button>
 
-              <button className="btn-delete" onClick={() => remove(user.id)}>
+              <button className="btn-delete" onClick={() => remove(u.id)}>
                 BORRAR
               </button>
             </div>

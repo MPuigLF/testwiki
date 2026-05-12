@@ -146,6 +146,20 @@ input {
 
   cursor: pointer;
 }
+.btn-gest {
+  background-color: darkorange;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.btn-gest:hover {
+  background-color: rgb(221, 97, 21);
+}
 
 /* ACCIONES */
 .row > div:nth-last-child(2),
