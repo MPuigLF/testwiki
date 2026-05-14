@@ -95,10 +95,9 @@ input {
 .row input[type='number'] {
   width: 70px;
 
-  padding: 6px;
+  padding: 8px;
 
-  background: #eef3ff;
-  border: 3px solid #e7872e;
+  background: #adedd3;
 
   color: rgb(0, 0, 0);
 
@@ -147,7 +146,7 @@ input {
   cursor: pointer;
 }
 .btn-gest {
-  background-color: darkorange;
+  background-color: rgb(243, 144, 15);
   color: white;
   border: none;
   padding: 8px 12px;

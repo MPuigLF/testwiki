@@ -19,7 +19,7 @@ export default function Inventario() {
 
   const [editId, setEditId] = useState<number | null>(null)
 
-  // 👇 RESTA PER CADA MATERIAL (IMPORTANT)
+  // RESTA PER CADA MATERIAL
   const [restes, setRestes] = useState<{ [key: number]: number }>({})
 
   async function load() {
@@ -38,19 +38,29 @@ export default function Inventario() {
   }, [])
 
   function handleChange(e: any) {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    setForm({
+      ...form,
+      [e.target.name]:
+        e.target.name === "cantidad"
+          ? Number(e.target.value)
+          : e.target.value
+    })
   }
 
   async function log(data: any, action: string = "UPDATE") {
+
     await fetch(HISTORY_API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         material: data.nombre,
         tipo: data.tipo,
         ubicacion: data.ubicacion,
         cantidad: data.cantidad,
-        action
+        action,
+        fecha: new Date().toISOString()
       })
     })
   }
@@ -61,7 +71,9 @@ export default function Inventario() {
 
       await fetch(`${API}/${editId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(form)
       })
 
@@ -71,15 +83,31 @@ export default function Inventario() {
 
       await fetch(API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(form)
       })
 
-      await log(form, "CREATE")
+      // CREACIÓ → POSITIU
+      await log(
+        {
+          ...form,
+          cantidad: Number(form.cantidad)
+        },
+        "CREATE"
+      )
     }
 
     setEditId(null)
-    setForm({ nombre: '', tipo: '', ubicacion: '', cantidad: 1 })
+
+    setForm({
+      nombre: '',
+      tipo: '',
+      ubicacion: '',
+      cantidad: 1
+    })
+
     load()
   }
 
@@ -92,20 +120,32 @@ export default function Inventario() {
 
     const item = items.find(i => i.id === id)
 
-    await fetch(`${API}/${id}`, { method: "DELETE" })
+    await fetch(`${API}/${id}`, {
+      method: "DELETE"
+    })
 
-    if (item) await log(item, "DELETE")
+    if (item) {
+      await log(
+        {
+          ...item,
+          cantidad: -Number(item.cantidad)
+        },
+        "DELETE"
+      )
+    }
 
     load()
   }
 
-  // ➖ RESTAR STOCK
+  // RESTAR STOCK
   async function restarCantidad(id: number, cantidadARestar: number) {
 
     const item = items.find(i => i.id === id)
+
     if (!item) return
 
-    const nuevaCantidad = Number(item.cantidad) - Number(cantidadARestar)
+    const nuevaCantidad =
+      Number(item.cantidad) - Number(cantidadARestar)
 
     if (nuevaCantidad < 0) {
       alert("No hi ha prou stock")
@@ -117,18 +157,29 @@ export default function Inventario() {
       cantidad: nuevaCantidad
     }
 
+    // ACTUALITZAR INVENTARI
     await fetch(`${API}/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(updated)
     })
 
-    await log(updated, "RESTA")
+    // HISTORIAL → NEGATIU
+    await log(
+      {
+        ...updated,
+        cantidad: -Number(cantidadARestar)
+      },
+      "RESTA"
+    )
 
     load()
   }
 
   return (
+
     <div className="inventory-layout">
 
       <h1>INVENTARIO</h1>
@@ -162,12 +213,18 @@ export default function Inventario() {
           onChange={handleChange}
         >
           <option value="">Ubicación</option>
+
           {locations.map(l => (
-            <option key={l.id} value={l.name}>{l.name}</option>
+            <option key={l.id} value={l.name}>
+              {l.name}
+            </option>
           ))}
         </select>
 
-        <button className="btn-edit" onClick={save}>
+        <button
+          className="btn-edit"
+          onClick={save}
+        >
           {editId ? "ACTUALIZAR" : "GUARDAR"}
         </button>
 
@@ -184,6 +241,7 @@ export default function Inventario() {
         </div>
 
         {items.map(i => (
+
           <div className="row" key={i.id}>
 
             <div>{i.nombre}</div>
@@ -191,19 +249,31 @@ export default function Inventario() {
             <div>{i.cantidad}</div>
             <div>{i.ubicacion}</div>
 
-            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '5px',
+                flexWrap: 'wrap'
+              }}
+            >
 
-              <button className="btn-edit" onClick={() => edit(i)}>
+              <button
+                className="btn-edit"
+                onClick={() => edit(i)}
+              >
                 EDITAR
               </button>
 
-              <button className="btn-delete" onClick={() => remove(i.id)}>
+              <button
+                className="btn-delete"
+                onClick={() => remove(i.id)}
+              >
                 BORRAR
               </button>
 
-              
               <input
                 type="number"
+                min={1}
                 value={restes[i.id] ?? 1}
                 onChange={(e) =>
                   setRestes({
@@ -212,12 +282,16 @@ export default function Inventario() {
                   })
                 }
                 style={{ width: '70px' }}
-                min={1}
               />
 
               <button
                 className="btn-gest"
-                onClick={() => restarCantidad(i.id, restes[i.id] ?? 1)}
+                onClick={() =>
+                  restarCantidad(
+                    i.id,
+                    restes[i.id] ?? 1
+                  )
+                }
               >
                 RESTAR
               </button>
@@ -225,6 +299,7 @@ export default function Inventario() {
             </div>
 
           </div>
+
         ))}
 
       </div>
